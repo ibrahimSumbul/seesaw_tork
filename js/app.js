@@ -25,6 +25,23 @@ function getRandomColor() {
     return CONFIG.COLORS[Math.floor(Math.random() * CONFIG.COLORS.length)];
 }
 
+function createRuler() {
+    const ruler = document.getElementById('ruler');
+    if (!ruler) return;
+    
+    ruler.innerHTML = '';
+    const ticks = [-200, -150, -100, -50, 0, 50, 100, 150, 200];
+    
+    ticks.forEach(pos => {
+        const tick = document.createElement('div');
+        tick.className = 'ruler-tick';
+        if (pos === 0) tick.classList.add('center', 'major');
+        else if (Math.abs(pos) === 200) tick.classList.add('major');
+        tick.innerHTML = `<span>${pos === 0 ? '0' : pos + 'px'}</span>`;
+        ruler.appendChild(tick);
+    });
+}
+
 // Physics
 function calculateTargetAngle() {
     const torqueDiff = state.rightTorque - state.leftTorque;
@@ -369,6 +386,8 @@ function init() {
     seesawContainer = document.getElementById('seesawContainer');
     seesawPlank = document.getElementById('seesawPlank');
     logContainer = document.getElementById('log');
+    
+    createRuler();
     
     // Load saved state or start fresh
     if (loadState() && state.objects.length > 0) {
