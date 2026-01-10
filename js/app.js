@@ -130,6 +130,35 @@ function updateStats() {
     document.getElementById('rightWeight').textContent = state.rightWeight.toFixed(1) + ' kg';
     document.getElementById('nextWeight').textContent = state.nextWeight + ' kg';
     document.getElementById('angle').textContent = state.currentAngle.toFixed(1) + '°';
+    updateTorquePanel();
+}
+
+function updateTorquePanel() {
+    document.getElementById('leftTorqueDisplay').textContent = state.leftTorque.toFixed(0);
+    document.getElementById('rightTorqueDisplay').textContent = state.rightTorque.toFixed(0);
+    
+    const netTorque = state.rightTorque - state.leftTorque;
+    document.getElementById('netTorque').textContent = (netTorque >= 0 ? '+' : '') + netTorque.toFixed(0);
+    
+    // Balance indicator
+    const indicator = document.getElementById('balanceIndicator');
+    indicator.className = 'balance-indicator';
+    if (netTorque < -50) indicator.classList.add('left');
+    else if (netTorque > 50) indicator.classList.add('right');
+    
+    // Formulas
+    const leftObjs = state.objects.filter(o => o.side === 'left' && o.torqueApplied);
+    const rightObjs = state.objects.filter(o => o.side === 'right' && o.torqueApplied);
+    
+    const leftFormula = leftObjs.length > 0 
+        ? leftObjs.map(o => `${o.weight}×${o.distance.toFixed(0)}`).join(' + ')
+        : '-';
+    const rightFormula = rightObjs.length > 0
+        ? rightObjs.map(o => `${o.weight}×${o.distance.toFixed(0)}`).join(' + ')
+        : '-';
+    
+    document.getElementById('leftFormula').textContent = leftFormula;
+    document.getElementById('rightFormula').textContent = rightFormula;
 }
 
 function updatePlankRotation() {

@@ -38,7 +38,38 @@
             <button id="resetBtn">🔄 Reset Seesaw</button>
         </div>
 
-        <div class="log" id="log"></div>
+        <div class="info-panels">
+            <div class="torque-panel">
+                <h3>⚖️ Torque Calculations</h3>
+                <div class="torque-grid">
+                    <div class="torque-side left">
+                        <div class="side-label">LEFT SIDE</div>
+                        <div class="torque-value" id="leftTorqueDisplay">0</div>
+                        <div class="torque-unit">N·m</div>
+                        <div class="torque-formula" id="leftFormula">-</div>
+                    </div>
+                    <div class="torque-center">
+                        <div class="balance-indicator" id="balanceIndicator">⚖️</div>
+                        <div class="net-torque">
+                            <span>Net:</span>
+                            <span id="netTorque">0</span>
+                        </div>
+                    </div>
+                    <div class="torque-side right">
+                        <div class="side-label">RIGHT SIDE</div>
+                        <div class="torque-value" id="rightTorqueDisplay">0</div>
+                        <div class="torque-unit">N·m</div>
+                        <div class="torque-formula" id="rightFormula">-</div>
+                    </div>
+                </div>
+                <div class="formula-info">
+                    <code>τ = Σ(weight × distance)</code>
+                    <code>angle = clamp(Δτ / 10, -30°, 30°)</code>
+                </div>
+            </div>
+
+            <div class="log" id="log"></div>
+        </div>
     </div>
 
     <script src="js/config.js"></script>
