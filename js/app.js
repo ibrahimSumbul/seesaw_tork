@@ -46,6 +46,63 @@ function updateAngle(targetAngle) {
     state.currentAngle += (targetAngle - state.currentAngle) * CONFIG.ANIMATION_SPEED;
 }
 
+// Storage
+function saveState() {
+    try {
+        const data = {
+            currentAngle: state.currentAngle,
+            leftTorque: state.leftTorque,
+            rightTorque: state.rightTorque,
+            leftWeight: state.leftWeight,
+            rightWeight: state.rightWeight,
+            nextWeight: state.nextWeight,
+            objectIdCounter: state.objectIdCounter,
+            objects: state.objects.map(obj => ({
+                id: obj.id,
+                position: obj.position,
+                distance: obj.distance,
+                side: obj.side,
+                weight: obj.weight,
+                size: obj.size,
+                color: obj.color,
+                torqueApplied: obj.torqueApplied
+            }))
+        };
+        localStorage.setItem(CONFIG.STORAGE_KEY, JSON.stringify(data));
+    } catch (e) {
+        console.warn('Storage save error:', e);
+    }
+}
+
+function loadState() {
+    try {
+        const saved = localStorage.getItem(CONFIG.STORAGE_KEY);
+        if (!saved) return false;
+        
+        const data = JSON.parse(saved);
+        state.currentAngle = data.currentAngle || 0;
+        state.leftTorque = data.leftTorque || 0;
+        state.rightTorque = data.rightTorque || 0;
+        state.leftWeight = data.leftWeight || 0;
+        state.rightWeight = data.rightWeight || 0;
+        state.nextWeight = data.nextWeight || generateRandomWeight();
+        state.objectIdCounter = data.objectIdCounter || 0;
+        state.objects = data.objects || [];
+        return true;
+    } catch (e) {
+        console.warn('Storage load error:', e);
+        return false;
+    }
+}
+
+function clearStorage() {
+    try {
+        localStorage.removeItem(CONFIG.STORAGE_KEY);
+    } catch (e) {
+        console.warn('Storage clear error:', e);
+    }
+}
+
 // DOM elements
 let seesawContainer, seesawPlank, logContainer;
 let lastDisplayedAngle = null;
@@ -84,6 +141,7 @@ function updateObjectPosition(obj) {
                 addTorque(obj.side, obj.weight, obj.distance);
                 updateStats();
                 addLogEntry(`✓ ${obj.weight}kg landed on ${obj.side} side at ${obj.distance.toFixed(0)}px`);
+                saveState();
             }
             updateObjectPosition(obj);
             return;
@@ -260,6 +318,7 @@ function handleSeesawClick(event) {
     
     objData.element = createObjectElement(objData);
     state.objects.push(objData);
+    saveState();
     
     state.nextWeight = generateRandomWeight();
     currentPreviewColor = getRandomColor();
@@ -298,6 +357,7 @@ function handleReset() {
     state.objects = [];
     state.objectIdCounter = 0;
     state.nextWeight = generateRandomWeight();
+    clearStorage();
     clearLog();
     updateStats();
     updatePlankRotation();
@@ -310,7 +370,18 @@ function init() {
     seesawPlank = document.getElementById('seesawPlank');
     logContainer = document.getElementById('log');
     
-    state.nextWeight = generateRandomWeight();
+    // Load saved state or start fresh
+    if (loadState() && state.objects.length > 0) {
+        state.objects.forEach(obj => {
+            obj.element = createObjectElement(obj);
+            obj.falling = false;
+            obj.bounceVelocity = 0;
+        });
+        addLogEntry(`📂 Restored ${state.objects.length} object(s) from saved state`);
+    } else {
+        state.nextWeight = generateRandomWeight();
+    }
+    
     currentPreviewColor = getRandomColor();
     
     seesawContainer.addEventListener('click', handleSeesawClick);
