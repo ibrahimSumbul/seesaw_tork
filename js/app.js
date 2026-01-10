@@ -162,6 +162,148 @@ function animationLoop() {
     requestAnimationFrame(animationLoop);
 }
 
+// Preview
+let previewLine = null;
+let previewObject = null;
+let currentPreviewPosition = null;
+let currentPreviewColor = null;
+
+function showPreview(positionX) {
+    const centerX = CONFIG.CONTAINER_WIDTH / 2;
+    const centerY = CONFIG.CONTAINER_HEIGHT / 2;
+    const weight = state.nextWeight;
+    const size = CONFIG.BASE_OBJECT_SIZE + (weight * CONFIG.SIZE_PER_KG);
+    const angleRad = degreesToRadians(state.currentAngle);
+    const targetY = centerY + positionX * Math.sin(angleRad);
+    
+    if (!previewLine) {
+        previewLine = document.createElement('div');
+        previewLine.className = 'preview-line';
+        seesawContainer.appendChild(previewLine);
+    }
+    
+    if (!previewObject) {
+        previewObject = document.createElement('div');
+        previewObject.className = 'preview-object';
+        seesawContainer.appendChild(previewObject);
+    }
+    
+    const lineX = centerX + positionX - 1;
+    const lineTop = 20;
+    const lineHeight = targetY - lineTop - size;
+    
+    previewLine.style.left = lineX + 'px';
+    previewLine.style.top = lineTop + 'px';
+    previewLine.style.height = Math.max(0, lineHeight) + 'px';
+    
+    previewObject.style.width = size * 2 + 'px';
+    previewObject.style.height = size * 2 + 'px';
+    previewObject.style.left = (centerX + positionX - size) + 'px';
+    previewObject.style.top = (lineTop - size) + 'px';
+    previewObject.style.background = currentPreviewColor;
+    previewObject.textContent = weight + 'kg';
+}
+
+function removePreview() {
+    if (previewLine && previewLine.parentNode) {
+        previewLine.parentNode.removeChild(previewLine);
+        previewLine = null;
+    }
+    if (previewObject && previewObject.parentNode) {
+        previewObject.parentNode.removeChild(previewObject);
+        previewObject = null;
+    }
+    currentPreviewPosition = null;
+}
+
+// Events
+function handleSeesawClick(event) {
+    let positionFromCenter;
+    
+    if (currentPreviewPosition !== null) {
+        positionFromCenter = currentPreviewPosition;
+    } else {
+        const rect = seesawContainer.getBoundingClientRect();
+        const centerX = rect.left + rect.width / 2;
+        const centerY = rect.top + rect.height / 2;
+        const relX = event.clientX - centerX;
+        const relY = event.clientY - centerY;
+        const angleRad = degreesToRadians(state.currentAngle);
+        
+        positionFromCenter = relX * Math.cos(-angleRad) - relY * Math.sin(-angleRad);
+        
+        if (Math.abs(positionFromCenter) > CONFIG.PLANK_WIDTH / 2 || Math.abs(positionFromCenter) < 10) {
+            return;
+        }
+    }
+    
+    const side = positionFromCenter < 0 ? 'left' : 'right';
+    const distance = Math.abs(positionFromCenter);
+    const weight = state.nextWeight;
+    const size = CONFIG.BASE_OBJECT_SIZE + (weight * CONFIG.SIZE_PER_KG);
+    const color = currentPreviewColor || getRandomColor();
+    
+    const objData = {
+        id: state.objectIdCounter++,
+        position: positionFromCenter,
+        distance: distance,
+        side: side,
+        weight: weight,
+        size: size,
+        color: color,
+        element: null,
+        falling: true,
+        y: -size,
+        bounceVelocity: 0,
+        torqueApplied: false
+    };
+    
+    objData.element = createObjectElement(objData);
+    state.objects.push(objData);
+    
+    state.nextWeight = generateRandomWeight();
+    currentPreviewColor = getRandomColor();
+    
+    updateStats();
+    addLogEntry(`📦 ${weight}kg dropping on ${side} side...`);
+    removePreview();
+}
+
+function handleSeesawHover(event) {
+    const rect = seesawContainer.getBoundingClientRect();
+    const centerX = rect.left + rect.width / 2;
+    const centerY = rect.top + rect.height / 2;
+    const relX = event.clientX - centerX;
+    const relY = event.clientY - centerY;
+    const angleRad = degreesToRadians(state.currentAngle);
+    
+    const unrotatedX = relX * Math.cos(-angleRad) - relY * Math.sin(-angleRad);
+    
+    if (Math.abs(unrotatedX) > CONFIG.PLANK_WIDTH / 2 || Math.abs(unrotatedX) < 10) {
+        removePreview();
+        return;
+    }
+    
+    currentPreviewPosition = unrotatedX;
+    showPreview(unrotatedX);
+}
+
+function handleReset() {
+    clearAllObjects();
+    state.currentAngle = 0;
+    state.leftTorque = 0;
+    state.rightTorque = 0;
+    state.leftWeight = 0;
+    state.rightWeight = 0;
+    state.objects = [];
+    state.objectIdCounter = 0;
+    state.nextWeight = generateRandomWeight();
+    clearLog();
+    updateStats();
+    updatePlankRotation();
+    addLogEntry('🔄 Seesaw has been reset');
+}
+
 // Init
 function init() {
     seesawContainer = document.getElementById('seesawContainer');
@@ -169,6 +311,13 @@ function init() {
     logContainer = document.getElementById('log');
     
     state.nextWeight = generateRandomWeight();
+    currentPreviewColor = getRandomColor();
+    
+    seesawContainer.addEventListener('click', handleSeesawClick);
+    seesawContainer.addEventListener('mousemove', handleSeesawHover);
+    seesawContainer.addEventListener('mouseleave', removePreview);
+    document.getElementById('resetBtn').addEventListener('click', handleReset);
+    
     updateStats();
     updatePlankRotation();
     requestAnimationFrame(animationLoop);
