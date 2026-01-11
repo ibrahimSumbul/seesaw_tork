@@ -63,7 +63,8 @@ const state = {
     rightWeight: 0,
     nextWeight: 0,
     objects: [],
-    objectIdCounter: 0
+    objectIdCounter: 0,
+    plankWidth: CONFIG.PLANK_WIDTH  // Dinamik plank genişliği
 };
 
 // Helpers
@@ -84,19 +85,29 @@ function createRuler() {
     if (!ruler) return;
     
     ruler.innerHTML = '';
-    const ticks = [-200, -150, -100, -50, 0, 50, 100, 150, 200];
-    const rulerWidth = CONFIG.PLANK_WIDTH; // 400px
+    const halfWidth = state.plankWidth / 2;
+    
+    // Dinamik tick'ler oluştur (her 50px'de bir)
+    const ticks = [];
+    for (let pos = -Math.floor(halfWidth / 50) * 50; pos <= Math.floor(halfWidth / 50) * 50; pos += 50) {
+        ticks.push(pos);
+    }
+    // Uç noktaları ekle
+    if (!ticks.includes(-halfWidth)) ticks.unshift(-halfWidth);
+    if (!ticks.includes(halfWidth)) ticks.push(halfWidth);
     
     ticks.forEach(pos => {
         const tick = document.createElement('div');
         tick.className = 'ruler-tick';
         if (pos === 0) tick.classList.add('center', 'major');
-        else if (Math.abs(pos) === 200) tick.classList.add('major');
+        else if (Math.abs(pos) === halfWidth) tick.classList.add('major');
         tick.innerHTML = `<span>${pos === 0 ? '0' : pos + 'px'}</span>`;
-        // Position tick at exact location (0 = center = 200px)
-        tick.style.left = (rulerWidth / 2 + pos) + 'px';
+        tick.style.left = (state.plankWidth / 2 + pos) + 'px';
         ruler.appendChild(tick);
     });
+    
+    // Ruler genişliğini güncelle
+    ruler.style.width = state.plankWidth + 'px';
 }
 
 // Physics
@@ -131,6 +142,7 @@ function saveState() {
             rightWeight: state.rightWeight,
             nextWeight: state.nextWeight,
             objectIdCounter: state.objectIdCounter,
+            plankWidth: state.plankWidth,
             objects: state.objects.map(obj => ({
                 id: obj.id,
                 position: obj.position,
@@ -161,6 +173,7 @@ function loadState() {
         state.rightWeight = data.rightWeight || 0;
         state.nextWeight = data.nextWeight || generateRandomWeight();
         state.objectIdCounter = data.objectIdCounter || 0;
+        state.plankWidth = data.plankWidth || CONFIG.PLANK_WIDTH;
         state.objects = data.objects || [];
         return true;
     } catch (e) {
@@ -394,8 +407,8 @@ function isOnPlank(relX, relY, angleRad) {
     const unrotatedX = relX * Math.cos(-angleRad) - relY * Math.sin(-angleRad);
     const unrotatedY = relX * Math.sin(-angleRad) + relY * Math.cos(-angleRad);
     
-    // Check X bounds (plank width)
-    if (Math.abs(unrotatedX) > CONFIG.PLANK_WIDTH / 2 || Math.abs(unrotatedX) < 10) {
+    // Check X bounds (plank width) - dinamik genişlik kullan
+    if (Math.abs(unrotatedX) > state.plankWidth / 2 || Math.abs(unrotatedX) < 10) {
         return null;
     }
     
@@ -504,12 +517,51 @@ function handleReset() {
 }
 
 // Init
+// Plank Width Control
+function getMinPlankWidth() {
+    // En uzaktaki nesnenin mesafesine göre minimum genişlik
+    if (state.objects.length === 0) return CONFIG.MIN_PLANK_WIDTH;
+    
+    const maxDistance = Math.max(...state.objects.map(obj => Math.abs(obj.position)));
+    // Minimum genişlik = en uzak nesne mesafesi × 2 + 20px buffer
+    return Math.max(CONFIG.MIN_PLANK_WIDTH, Math.ceil((maxDistance + 20) * 2));
+}
+
+function updatePlankWidth(newWidth) {
+    const minWidth = getMinPlankWidth();
+    
+    // Minimum genişlik kontrolü
+    if (newWidth < minWidth) {
+        newWidth = minWidth;
+        // Slider'ı minimum değere ayarla
+        const slider = document.getElementById('plankWidthSlider');
+        if (slider) slider.value = newWidth;
+    }
+    
+    state.plankWidth = newWidth;
+    
+    // Plank CSS güncelle
+    seesawPlank.style.width = newWidth + 'px';
+    
+    // Ruler yeniden oluştur
+    createRuler();
+    
+    // Slider değerini güncelle
+    document.getElementById('plankWidthValue').textContent = newWidth + 'px';
+    
+    // State kaydet
+    saveState();
+}
+
+function handlePlankSliderChange(event) {
+    const newWidth = parseInt(event.target.value);
+    updatePlankWidth(newWidth);
+}
+
 function init() {
     seesawContainer = document.getElementById('seesawContainer');
     seesawPlank = document.getElementById('seesawPlank');
     logContainer = document.getElementById('log');
-    
-    createRuler();
     
     // Load saved state or start fresh
     if (loadState() && state.objects.length > 0) {
@@ -523,6 +575,16 @@ function init() {
         state.nextWeight = generateRandomWeight();
     }
     
+    // Plank genişliğini başlat
+    seesawPlank.style.width = state.plankWidth + 'px';
+    const slider = document.getElementById('plankWidthSlider');
+    if (slider) {
+        slider.value = state.plankWidth;
+        slider.addEventListener('input', handlePlankSliderChange);
+    }
+    document.getElementById('plankWidthValue').textContent = state.plankWidth + 'px';
+    
+    createRuler();
     currentPreviewColor = getRandomColor();
     
     seesawContainer.addEventListener('click', handleSeesawClick);

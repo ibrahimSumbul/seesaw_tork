@@ -27,11 +27,26 @@
             </div>
         </div>
 
-        <div class="seesaw-container" id="seesawContainer">
-            <div class="ground"></div>
-            <div class="pivot"></div>
-            <div class="seesaw-plank" id="seesawPlank"></div>
-            <div class="ruler" id="ruler"></div>
+        <div class="seesaw-area">
+            <div class="seesaw-container" id="seesawContainer">
+                <div class="ground"></div>
+                <div class="pivot"></div>
+                <div class="seesaw-plank" id="seesawPlank"></div>
+                <div class="ruler" id="ruler"></div>
+            </div>
+            
+            <!-- Plank Width Slider -->
+            <div class="plank-slider-container">
+                <div class="slider-label">📏 Plank</div>
+                <input type="range" 
+                       id="plankWidthSlider" 
+                       class="vertical-slider"
+                       min="400" 
+                       max="1000" 
+                       value="400"
+                       orient="vertical">
+                <div class="slider-value" id="plankWidthValue">400px</div>
+            </div>
         </div>
 
         <div class="controls">
