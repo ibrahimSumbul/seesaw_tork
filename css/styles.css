@@ -192,21 +192,21 @@ body {
     top: calc(50% + 55px);
     transform: translateX(-50%);
     width: 400px;
-    height: 25px;
-    display: flex;
-    justify-content: space-between;
-    align-items: flex-start;
+    height: 30px;
     z-index: 4;
     pointer-events: none;
+    /* Needed for absolute positioned children */
 }
 
 .ruler-tick {
+    position: absolute;
     display: flex;
     flex-direction: column;
     align-items: center;
     font-size: 9px;
     color: #4a5568;
     font-weight: 500;
+    transform: translateX(-50%);
 }
 
 .ruler-tick::before {

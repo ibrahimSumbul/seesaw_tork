@@ -31,6 +31,7 @@ function createRuler() {
     
     ruler.innerHTML = '';
     const ticks = [-200, -150, -100, -50, 0, 50, 100, 150, 200];
+    const rulerWidth = CONFIG.PLANK_WIDTH; // 400px
     
     ticks.forEach(pos => {
         const tick = document.createElement('div');
@@ -38,6 +39,8 @@ function createRuler() {
         if (pos === 0) tick.classList.add('center', 'major');
         else if (Math.abs(pos) === 200) tick.classList.add('major');
         tick.innerHTML = `<span>${pos === 0 ? '0' : pos + 'px'}</span>`;
+        // Position tick at exact location (0 = center = 200px)
+        tick.style.left = (rulerWidth / 2 + pos) + 'px';
         ruler.appendChild(tick);
     });
 }
@@ -321,6 +324,29 @@ function removePreview() {
 }
 
 // Events
+function isOnPlank(relX, relY, angleRad) {
+    // Rotate click position to plank's local coordinate system
+    const unrotatedX = relX * Math.cos(-angleRad) - relY * Math.sin(-angleRad);
+    const unrotatedY = relX * Math.sin(-angleRad) + relY * Math.cos(-angleRad);
+    
+    // Check X bounds (plank width)
+    if (Math.abs(unrotatedX) > CONFIG.PLANK_WIDTH / 2 || Math.abs(unrotatedX) < 10) {
+        return null;
+    }
+    
+    // Check Y bounds (plank height + tolerance for clicking above)
+    // Plank is at PIVOT_OFFSET below center, and we want clicks slightly above it
+    const plankYOffset = CONFIG.PIVOT_OFFSET;
+    const tolerance = CONFIG.PLANK_HEIGHT + 40; // Click area above the plank
+    
+    // unrotatedY should be near the plank level (slightly above or on it)
+    if (unrotatedY < plankYOffset - tolerance || unrotatedY > plankYOffset + CONFIG.PLANK_HEIGHT + 20) {
+        return null;
+    }
+    
+    return unrotatedX;
+}
+
 function handleSeesawClick(event) {
     let positionFromCenter;
     
@@ -334,9 +360,9 @@ function handleSeesawClick(event) {
         const relY = event.clientY - centerY;
         const angleRad = degreesToRadians(state.currentAngle);
         
-        positionFromCenter = relX * Math.cos(-angleRad) - relY * Math.sin(-angleRad);
+        positionFromCenter = isOnPlank(relX, relY, angleRad);
         
-        if (Math.abs(positionFromCenter) > CONFIG.PLANK_WIDTH / 2 || Math.abs(positionFromCenter) < 10) {
+        if (positionFromCenter === null) {
             return;
         }
     }
@@ -382,9 +408,9 @@ function handleSeesawHover(event) {
     const relY = event.clientY - centerY;
     const angleRad = degreesToRadians(state.currentAngle);
     
-    const unrotatedX = relX * Math.cos(-angleRad) - relY * Math.sin(-angleRad);
+    const unrotatedX = isOnPlank(relX, relY, angleRad);
     
-    if (Math.abs(unrotatedX) > CONFIG.PLANK_WIDTH / 2 || Math.abs(unrotatedX) < 10) {
+    if (unrotatedX === null) {
         removePreview();
         return;
     }
