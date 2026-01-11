@@ -1,5 +1,59 @@
 /* Seesaw Simulation - Main Application */
 
+// Audio Context (Web Audio API)
+let audioContext = null;
+
+function initAudio() {
+    if (!audioContext) {
+        audioContext = new (window.AudioContext || window.webkitAudioContext)();
+    }
+    return audioContext;
+}
+
+function playSound(frequency, duration, type = 'sine', volume = 0.3) {
+    try {
+        const ctx = initAudio();
+        if (ctx.state === 'suspended') ctx.resume();
+        
+        const oscillator = ctx.createOscillator();
+        const gainNode = ctx.createGain();
+        
+        oscillator.type = type;
+        oscillator.frequency.setValueAtTime(frequency, ctx.currentTime);
+        
+        gainNode.gain.setValueAtTime(volume, ctx.currentTime);
+        gainNode.gain.exponentialRampToValueAtTime(0.01, ctx.currentTime + duration);
+        
+        oscillator.connect(gainNode);
+        gainNode.connect(ctx.destination);
+        
+        oscillator.start(ctx.currentTime);
+        oscillator.stop(ctx.currentTime + duration);
+    } catch (e) {
+        // Audio not supported
+    }
+}
+
+function playDropSound() {
+    // Falling whistle sound (descending pitch)
+    playSound(600, 0.15, 'sine', 0.2);
+    setTimeout(() => playSound(400, 0.1, 'sine', 0.15), 100);
+}
+
+function playLandSound(weight) {
+    // Impact sound - heavier = lower pitch, louder
+    const basePitch = 200 - (weight * 10);
+    const volume = 0.2 + (weight * 0.03);
+    playSound(Math.max(80, basePitch), 0.2, 'triangle', Math.min(0.5, volume));
+}
+
+function playResetSound() {
+    // Quick sweep up
+    playSound(300, 0.1, 'square', 0.15);
+    setTimeout(() => playSound(500, 0.1, 'square', 0.15), 80);
+    setTimeout(() => playSound(700, 0.15, 'square', 0.1), 160);
+}
+
 // State
 const state = {
     currentAngle: 0,
@@ -190,6 +244,7 @@ function updateObjectPosition(obj) {
                 addTorque(obj.side, obj.weight, obj.distance);
                 updateStats();
                 addLogEntry(`✓ ${obj.weight}kg landed on ${obj.side} side at ${obj.distance.toFixed(0)}px`);
+                playLandSound(obj.weight);
                 saveState();
             }
             updateObjectPosition(obj);
@@ -397,6 +452,7 @@ function handleSeesawClick(event) {
     
     updateStats();
     addLogEntry(`📦 ${weight}kg dropping on ${side} side...`);
+    playDropSound();
     removePreview();
 }
 
@@ -434,6 +490,7 @@ function handleReset() {
     updateStats();
     updatePlankRotation();
     addLogEntry('🔄 Seesaw has been reset');
+    playResetSound();
 }
 
 // Init
