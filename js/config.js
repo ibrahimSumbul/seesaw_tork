@@ -1,7 +1,7 @@
 /* Seesaw Simulation - Configuration */
 
 const CONFIG = {
-    CONTAINER_WIDTH: 800,
+    CONTAINER_WIDTH: 1200,
     CONTAINER_HEIGHT: 500,
     PLANK_WIDTH: 400,
     PLANK_HEIGHT: 20,

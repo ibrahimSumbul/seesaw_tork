@@ -21,7 +21,7 @@ body {
     border-radius: 16px;
     padding: 30px;
     box-shadow: 0 10px 40px rgba(0, 0, 0, 0.1);
-    max-width: 900px;
+    max-width: 1300px;
     width: 100%;
 }
 
@@ -55,63 +55,44 @@ body {
     color: #2d3748;
 }
 
-/* === Seesaw Area (Container + Slider) === */
-.seesaw-area {
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    gap: 15px;
-    margin: 0 auto;
-}
-
+/* === Seesaw Container === */
 .seesaw-container {
     position: relative;
-    width: 800px;
+    width: 1200px;
     height: 500px;
+    margin: 0 auto;
     background: linear-gradient(180deg, #e8f4f8 0%, #d5e8ed 100%);
     border-radius: 12px;
     border: 1px solid #d1e3e8;
     overflow: hidden;
 }
 
-/* === Plank Width Slider === */
-.plank-slider-container {
+/* === Plank Width Slider (Horizontal in Stats) === */
+.plank-slider-box {
+    min-width: 180px;
+}
+
+.slider-row {
     display: flex;
-    flex-direction: column;
     align-items: center;
     gap: 10px;
-    padding: 15px 10px;
-    background: #f8f9fa;
-    border-radius: 12px;
-    border: 1px solid #e9ecef;
+    margin-top: 5px;
 }
 
-.slider-label {
-    font-size: 11px;
-    text-transform: uppercase;
-    color: #6c757d;
-    letter-spacing: 1px;
-    font-weight: 600;
-    white-space: nowrap;
-}
-
-.vertical-slider {
-    -webkit-appearance: slider-vertical;
-    appearance: slider-vertical;
-    width: 20px;
-    height: 200px;
+.horizontal-slider {
+    -webkit-appearance: none;
+    appearance: none;
+    width: 100px;
+    height: 6px;
+    background: linear-gradient(to right, #e74c3c, #f39c12, #2ecc71);
+    border-radius: 3px;
     cursor: pointer;
 }
 
-/* Firefox vertical slider */
-.vertical-slider {
-    writing-mode: bt-lr;
-}
-
-.vertical-slider::-webkit-slider-thumb {
+.horizontal-slider::-webkit-slider-thumb {
     -webkit-appearance: none;
-    width: 18px;
-    height: 18px;
+    width: 16px;
+    height: 16px;
     background: #3498db;
     border-radius: 50%;
     cursor: pointer;
@@ -119,22 +100,21 @@ body {
     box-shadow: 0 2px 6px rgba(0,0,0,0.2);
 }
 
-.vertical-slider::-webkit-slider-runnable-track {
-    background: linear-gradient(to top, #e74c3c, #f39c12, #2ecc71);
-    border-radius: 10px;
-    width: 8px;
+.horizontal-slider::-moz-range-thumb {
+    width: 16px;
+    height: 16px;
+    background: #3498db;
+    border-radius: 50%;
+    cursor: pointer;
+    border: 2px solid white;
+    box-shadow: 0 2px 6px rgba(0,0,0,0.2);
 }
 
 .slider-value {
-    font-size: 14px;
-    font-weight: 700;
+    font-size: 13px;
+    font-weight: 600;
     color: #2d3748;
-    background: white;
-    padding: 5px 10px;
-    border-radius: 6px;
-    border: 1px solid #e9ecef;
-    min-width: 60px;
-    text-align: center;
+    min-width: 50px;
 }
 
 .ground {
