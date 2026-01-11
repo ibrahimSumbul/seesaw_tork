@@ -231,6 +231,9 @@ function updateObjectPosition(obj) {
     
     if (obj.falling) {
         obj.y += CONFIG.FALL_SPEED;
+        
+        // Plank koordinat sistemine göre pozisyon hesapla
+        const rotatedX = obj.position * Math.cos(angleRad);
         const rotatedY = obj.position * Math.sin(angleRad);
         const targetY = centerY + rotatedY - obj.size - CONFIG.PLANK_HEIGHT;
         
@@ -241,6 +244,7 @@ function updateObjectPosition(obj) {
             
             if (!obj.torqueApplied) {
                 obj.torqueApplied = true;
+                // Tork hesaplaması: plank üzerindeki mesafe (obj.distance)
                 addTorque(obj.side, obj.weight, obj.distance);
                 updateStats();
                 addLogEntry(`✓ ${obj.weight}kg landed on ${obj.side} side at ${obj.distance.toFixed(0)}px`);
@@ -251,7 +255,8 @@ function updateObjectPosition(obj) {
             return;
         }
         
-        obj.element.style.left = (centerX + obj.position - obj.size) + 'px';
+        // Düşerken de plank açısına göre X pozisyonu
+        obj.element.style.left = (centerX + rotatedX - obj.size) + 'px';
         obj.element.style.top = obj.y + 'px';
     } else {
         const rotatedX = obj.position * Math.cos(angleRad);
@@ -332,11 +337,15 @@ let currentPreviewColor = null;
 
 function showPreview(positionX) {
     const centerX = CONFIG.CONTAINER_WIDTH / 2;
-    const centerY = CONFIG.CONTAINER_HEIGHT / 2;
+    const centerY = CONFIG.CONTAINER_HEIGHT / 2 + CONFIG.PIVOT_OFFSET;
     const weight = state.nextWeight;
     const size = CONFIG.BASE_OBJECT_SIZE + (weight * CONFIG.SIZE_PER_KG);
     const angleRad = degreesToRadians(state.currentAngle);
-    const targetY = centerY + positionX * Math.sin(angleRad);
+    
+    // Plank koordinat sistemine göre pozisyon hesapla
+    const rotatedX = positionX * Math.cos(angleRad);
+    const rotatedY = positionX * Math.sin(angleRad);
+    const targetY = centerY + rotatedY - size - CONFIG.PLANK_HEIGHT;
     
     if (!previewLine) {
         previewLine = document.createElement('div');
@@ -350,9 +359,10 @@ function showPreview(positionX) {
         seesawContainer.appendChild(previewObject);
     }
     
-    const lineX = centerX + positionX - 1;
+    // Line ve object pozisyonları plank açısına göre
+    const lineX = centerX + rotatedX - 1;
     const lineTop = 20;
-    const lineHeight = targetY - lineTop - size;
+    const lineHeight = targetY - lineTop;
     
     previewLine.style.left = lineX + 'px';
     previewLine.style.top = lineTop + 'px';
@@ -360,7 +370,7 @@ function showPreview(positionX) {
     
     previewObject.style.width = size * 2 + 'px';
     previewObject.style.height = size * 2 + 'px';
-    previewObject.style.left = (centerX + positionX - size) + 'px';
+    previewObject.style.left = (centerX + rotatedX - size) + 'px';
     previewObject.style.top = (lineTop - size) + 'px';
     previewObject.style.background = currentPreviewColor;
     previewObject.textContent = weight + 'kg';
