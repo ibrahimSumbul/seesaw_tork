@@ -3,7 +3,7 @@
 Tork tabanlı fizik mekanikleri ile interaktif seesaw simülasyonu. Pure JavaScript ile geliştirilmiş, multi-seesaw desteği olan eğitici bir fizik simülasyonu.
 
 ![Seesaw Simulation Demo](screenshot.png)
-
+https://ibrahimsumbul.github.io/seesaw_tork
 ## Özellikler
 
 ### Fizik Motoru
