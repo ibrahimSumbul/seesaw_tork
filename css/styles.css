@@ -487,3 +487,234 @@ body {
     border-radius: 4px;
     color: #495057;
 }
+
+/* === Responsive Design === */
+
+/* Tablet (768px - 1024px) */
+@media (max-width: 1024px) {
+    .container {
+        padding: 20px;
+        max-width: 100%;
+    }
+    
+    .seesaw-container {
+        width: 100%;
+        max-width: 800px;
+        height: 400px;
+    }
+    
+    .stats {
+        flex-wrap: wrap;
+        gap: 10px;
+    }
+    
+    .stat-box {
+        min-width: 100px;
+        padding: 12px 15px;
+        flex: 1 1 calc(50% - 10px);
+    }
+    
+    .info-panels {
+        grid-template-columns: 1fr;
+    }
+}
+
+/* Mobile (480px - 768px) */
+@media (max-width: 768px) {
+    body {
+        padding: 10px;
+    }
+    
+    .container {
+        padding: 15px;
+        border-radius: 12px;
+    }
+    
+    .seesaw-tabs {
+        gap: 3px;
+        padding: 3px;
+    }
+    
+    .seesaw-tab {
+        padding: 6px 10px;
+        font-size: 12px;
+    }
+    
+    .stats {
+        flex-direction: column;
+        gap: 10px;
+    }
+    
+    .stat-box {
+        min-width: 100%;
+        padding: 12px;
+    }
+    
+    .stat-label {
+        font-size: 10px;
+    }
+    
+    .stat-value {
+        font-size: 20px;
+    }
+    
+    .seesaw-container {
+        width: 100%;
+        height: 350px;
+        max-width: 100%;
+    }
+    
+    .plank-slider-box {
+        min-width: 100%;
+    }
+    
+    .slider-row {
+        justify-content: space-between;
+    }
+    
+    .horizontal-slider {
+        flex: 1;
+        max-width: 200px;
+    }
+    
+    .controls button {
+        padding: 10px 20px;
+        font-size: 14px;
+        width: 100%;
+    }
+    
+    .info-panels {
+        gap: 15px;
+    }
+    
+    .torque-panel {
+        padding: 12px;
+    }
+    
+    .torque-grid {
+        gap: 8px;
+    }
+    
+    .torque-value {
+        font-size: 20px;
+    }
+    
+    .ruler {
+        font-size: 8px;
+    }
+    
+    .ruler-tick {
+        font-size: 8px;
+    }
+}
+
+/* Small Mobile (< 480px) */
+@media (max-width: 480px) {
+    body {
+        padding: 5px;
+    }
+    
+    .container {
+        padding: 10px;
+    }
+    
+    .seesaw-tabs {
+        margin-bottom: 10px;
+    }
+    
+    .seesaw-tab {
+        padding: 5px 8px;
+        font-size: 11px;
+    }
+    
+    .seesaw-tab .tab-name {
+        max-width: 60px;
+    }
+    
+    .stats {
+        margin-bottom: 15px;
+    }
+    
+    .stat-box {
+        padding: 10px;
+    }
+    
+    .stat-label {
+        font-size: 9px;
+    }
+    
+    .stat-value {
+        font-size: 18px;
+    }
+    
+    .seesaw-container {
+        height: 300px;
+    }
+    
+    .horizontal-slider {
+        max-width: 150px;
+    }
+    
+    .controls button {
+        padding: 8px 15px;
+        font-size: 13px;
+    }
+    
+    .torque-panel h3 {
+        font-size: 12px;
+    }
+    
+    .torque-value {
+        font-size: 18px;
+    }
+    
+    .torque-formula {
+        font-size: 9px;
+    }
+    
+    .formula-info {
+        flex-direction: column;
+        gap: 5px;
+    }
+    
+    .formula-info code {
+        font-size: 9px;
+    }
+    
+    .log {
+        max-height: 120px;
+        font-size: 11px;
+    }
+    
+    .log-entry {
+        padding: 6px 10px;
+        font-size: 11px;
+    }
+}
+
+/* Touch-friendly adjustments */
+@media (hover: none) and (pointer: coarse) {
+    .seesaw-tab {
+        padding: 10px 14px;
+        min-height: 44px; /* iOS touch target size */
+    }
+    
+    .controls button {
+        min-height: 44px;
+        padding: 12px 24px;
+    }
+    
+    .horizontal-slider {
+        height: 8px;
+    }
+    
+    .horizontal-slider::-webkit-slider-thumb {
+        width: 20px;
+        height: 20px;
+    }
+    
+    .horizontal-slider::-moz-range-thumb {
+        width: 20px;
+        height: 20px;
+    }
+}

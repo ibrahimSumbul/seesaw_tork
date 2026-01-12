@@ -264,4 +264,22 @@ const SeesawManager = {
 // Initialize on DOM ready
 document.addEventListener('DOMContentLoaded', () => {
     SeesawManager.init();
+    
+    // Handle viewport resize for responsive design
+    let resizeTimeout;
+    window.addEventListener('resize', () => {
+        clearTimeout(resizeTimeout);
+        resizeTimeout = setTimeout(() => {
+            // Update active seesaw's object positions on resize
+            const activeSeesaw = SeesawManager.getActiveSeesaw();
+            if (activeSeesaw) {
+                activeSeesaw.state.objects.forEach(obj => {
+                    if (obj.element) {
+                        activeSeesaw.updateObjectPosition(obj);
+                    }
+                });
+                activeSeesaw.createRuler();
+            }
+        }, 250); // Debounce resize events
+    });
 });

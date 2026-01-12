@@ -38,7 +38,15 @@ class Seesaw {
         this.handleClick = this.handleClick.bind(this);
         this.handleHover = this.handleHover.bind(this);
         this.handleMouseLeave = this.handleMouseLeave.bind(this);
+        this.handleTouchStart = this.handleTouchStart.bind(this);
+        this.handleTouchMove = this.handleTouchMove.bind(this);
+        this.handleTouchEnd = this.handleTouchEnd.bind(this);
         this.animationLoop = this.animationLoop.bind(this);
+        
+        // Touch state
+        this.touchStartX = null;
+        this.touchStartY = null;
+        this.isTouching = false;
     }
 
     // Initialization
@@ -61,9 +69,15 @@ class Seesaw {
         if (this.isActive) return;
         this.isActive = true;
         
+        // Mouse events
         this.container.addEventListener('click', this.handleClick);
         this.container.addEventListener('mousemove', this.handleHover);
         this.container.addEventListener('mouseleave', this.handleMouseLeave);
+        
+        // Touch events (mobile support)
+        this.container.addEventListener('touchstart', this.handleTouchStart, { passive: false });
+        this.container.addEventListener('touchmove', this.handleTouchMove, { passive: false });
+        this.container.addEventListener('touchend', this.handleTouchEnd);
         
         this.startAnimation();
         this.updateStats();
@@ -74,9 +88,15 @@ class Seesaw {
         if (!this.isActive) return;
         this.isActive = false;
         
+        // Mouse events
         this.container.removeEventListener('click', this.handleClick);
         this.container.removeEventListener('mousemove', this.handleHover);
         this.container.removeEventListener('mouseleave', this.handleMouseLeave);
+        
+        // Touch events
+        this.container.removeEventListener('touchstart', this.handleTouchStart);
+        this.container.removeEventListener('touchmove', this.handleTouchMove);
+        this.container.removeEventListener('touchend', this.handleTouchEnd);
         
         this.stopAnimation();
         this.removePreview();
@@ -236,8 +256,8 @@ class Seesaw {
     updateObjectPosition(obj) {
         if (!obj.element) return;
         
-        const centerX = CONFIG.CONTAINER_WIDTH / 2;
-        const centerY = CONFIG.CONTAINER_HEIGHT / 2 + CONFIG.PIVOT_OFFSET;
+        const centerX = CONFIG.getContainerWidth() / 2;
+        const centerY = CONFIG.getContainerHeight() / 2 + CONFIG.PIVOT_OFFSET;
         const angleRad = this.degreesToRadians(this.state.currentAngle);
         
         if (obj.falling) {
@@ -332,8 +352,8 @@ class Seesaw {
 
     // Preview
     showPreview(positionX) {
-        const centerX = CONFIG.CONTAINER_WIDTH / 2;
-        const centerY = CONFIG.CONTAINER_HEIGHT / 2 + CONFIG.PIVOT_OFFSET;
+        const centerX = CONFIG.getContainerWidth() / 2;
+        const centerY = CONFIG.getContainerHeight() / 2 + CONFIG.PIVOT_OFFSET;
         const weight = this.state.nextWeight;
         const size = CONFIG.BASE_OBJECT_SIZE + (weight * CONFIG.SIZE_PER_KG);
         const angleRad = this.degreesToRadians(this.state.currentAngle);
@@ -476,11 +496,71 @@ class Seesaw {
         this.removePreview();
     }
 
+    // Touch Events
+    handleTouchStart(event) {
+        if (event.touches.length !== 1) return;
+        event.preventDefault();
+        
+        const touch = event.touches[0];
+        const rect = this.container.getBoundingClientRect();
+        this.touchStartX = touch.clientX;
+        this.touchStartY = touch.clientY;
+        this.isTouching = true;
+        
+        // Show preview on touch
+        this.handleTouchMove(event);
+    }
+
+    handleTouchMove(event) {
+        if (!this.isTouching || event.touches.length !== 1) return;
+        event.preventDefault();
+        
+        const touch = event.touches[0];
+        const rect = this.container.getBoundingClientRect();
+        const centerX = rect.left + rect.width / 2;
+        const centerY = rect.top + rect.height / 2;
+        const relX = touch.clientX - centerX;
+        const relY = touch.clientY - centerY;
+        const angleRad = this.degreesToRadians(this.state.currentAngle);
+        
+        const unrotatedX = this.isOnPlank(relX, relY, angleRad);
+        
+        if (unrotatedX === null) {
+            this.removePreview();
+            return;
+        }
+        
+        this.currentPreviewPosition = unrotatedX;
+        this.showPreview(unrotatedX);
+    }
+
+    handleTouchEnd(event) {
+        if (!this.isTouching) return;
+        event.preventDefault();
+        
+        // Simulate click if touch ended on plank
+        if (this.currentPreviewPosition !== null) {
+            const fakeEvent = {
+                clientX: this.touchStartX,
+                clientY: this.touchStartY
+            };
+            this.handleClick(fakeEvent);
+        }
+        
+        this.isTouching = false;
+        this.touchStartX = null;
+        this.touchStartY = null;
+        this.removePreview();
+    }
+
     // Plank Width
     getMinPlankWidth() {
-        if (this.state.objects.length === 0) return CONFIG.MIN_PLANK_WIDTH;
+        // Mobile: smaller minimum width
+        const minWidth = CONFIG.isMobile() ? 300 : CONFIG.MIN_PLANK_WIDTH;
+        
+        if (this.state.objects.length === 0) return minWidth;
         const maxDistance = Math.max(...this.state.objects.map(obj => Math.abs(obj.position)));
-        return Math.max(CONFIG.MIN_PLANK_WIDTH, Math.ceil((maxDistance + 20) * 2));
+        return Math.max(minWidth, Math.ceil((maxDistance + 20) * 2));
     }
 
     updatePlankWidth(newWidth) {
@@ -563,7 +643,7 @@ class Seesaw {
             obj.bounceVelocity = 0;
             
             // Nesnenin y pozisyonunu hesapla (plank üzerinde olmalı)
-            const centerY = CONFIG.CONTAINER_HEIGHT / 2 + CONFIG.PIVOT_OFFSET;
+            const centerY = CONFIG.getContainerHeight() / 2 + CONFIG.PIVOT_OFFSET;
             const angleRad = this.degreesToRadians(this.state.currentAngle);
             const rotatedY = obj.position * Math.sin(angleRad);
             obj.y = centerY + rotatedY - obj.size - CONFIG.PLANK_HEIGHT;

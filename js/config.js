@@ -19,5 +19,26 @@ const CONFIG = {
     BOUNCE_INITIAL: -3,
     BOUNCE_DECELERATION: 0.5,
     COLORS: ['#e74c3c', '#3498db', '#2ecc71', '#f39c12', '#9b59b6', '#1abc9c', '#e67e22', '#34495e'],
-    STORAGE_KEY: 'seesawState'
+    STORAGE_KEY: 'seesawState',
+    
+    // Responsive
+    getContainerWidth() {
+        const container = document.getElementById('seesawContainer');
+        if (!container) return this.CONTAINER_WIDTH;
+        return container.offsetWidth || this.CONTAINER_WIDTH;
+    },
+    
+    getContainerHeight() {
+        const container = document.getElementById('seesawContainer');
+        if (!container) return this.CONTAINER_HEIGHT;
+        return container.offsetHeight || this.CONTAINER_HEIGHT;
+    },
+    
+    isMobile() {
+        return window.innerWidth <= 768;
+    },
+    
+    isTablet() {
+        return window.innerWidth > 768 && window.innerWidth <= 1024;
+    }
 };
