@@ -23,17 +23,20 @@ body {
     box-shadow: 0 10px 40px rgba(0, 0, 0, 0.1);
     max-width: 1300px;
     width: 100%;
+    box-sizing: border-box;
 }
 
 /* === Seesaw Tabs === */
 .seesaw-tabs {
     display: flex;
+    flex-wrap: wrap;
     gap: 5px;
     margin-bottom: 15px;
     padding: 5px;
     background: #f1f3f4;
     border-radius: 10px;
     overflow-x: auto;
+    -webkit-overflow-scrolling: touch;
 }
 
 .seesaw-tab {
@@ -50,6 +53,8 @@ body {
     font-weight: 500;
     color: #5f6368;
     white-space: nowrap;
+    flex-shrink: 0;
+    min-width: fit-content;
 }
 
 .seesaw-tab:hover {
@@ -498,6 +503,8 @@ body {
     .container {
         padding: 20px;
         max-width: 100%;
+        width: 100%;
+        box-sizing: border-box;
     }
     
     .seesaw-container {
@@ -533,16 +540,22 @@ body {
     .container {
         padding: 15px;
         border-radius: 12px;
+        width: 100%;
+        max-width: 100%;
+        box-sizing: border-box;
     }
     
     .seesaw-tabs {
         gap: 3px;
         padding: 3px;
+        flex-wrap: wrap;
     }
     
     .seesaw-tab {
         padding: 6px 10px;
         font-size: 12px;
+        flex-shrink: 1;
+        min-width: 80px;
     }
     
     .stats {
@@ -623,15 +636,21 @@ body {
     
     .container {
         padding: 10px;
+        width: 100%;
+        max-width: 100%;
+        box-sizing: border-box;
     }
     
     .seesaw-tabs {
         margin-bottom: 10px;
+        flex-wrap: wrap;
     }
     
     .seesaw-tab {
         padding: 5px 8px;
         font-size: 11px;
+        flex-shrink: 1;
+        min-width: 70px;
     }
     
     .seesaw-tab .tab-name {
