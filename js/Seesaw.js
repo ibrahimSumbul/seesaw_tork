@@ -297,11 +297,22 @@ class Seesaw {
     }
 
     clearAllObjects() {
+        // Önce state'teki nesneleri temizle
         this.state.objects.forEach(obj => {
             if (obj.element && obj.element.parentNode) {
                 obj.element.parentNode.removeChild(obj.element);
             }
         });
+        
+        // Container'daki tüm .object element'lerini temizle (kalan nesneler için)
+        if (this.container) {
+            const allObjects = this.container.querySelectorAll('.object');
+            allObjects.forEach(obj => {
+                if (obj.parentNode) {
+                    obj.parentNode.removeChild(obj);
+                }
+            });
+        }
     }
 
     addLogEntry(message) {
@@ -550,11 +561,22 @@ class Seesaw {
             obj.element = this.createObjectElement(obj);
             obj.falling = false;
             obj.bounceVelocity = 0;
+            
+            // Nesnenin y pozisyonunu hesapla (plank üzerinde olmalı)
+            const centerY = CONFIG.CONTAINER_HEIGHT / 2 + CONFIG.PIVOT_OFFSET;
+            const angleRad = this.degreesToRadians(this.state.currentAngle);
+            const rotatedY = obj.position * Math.sin(angleRad);
+            obj.y = centerY + rotatedY - obj.size - CONFIG.PLANK_HEIGHT;
         });
         
         this.updatePlankWidth(this.state.plankWidth);
         this.updateStats();
         this.updatePlankRotation();
+        
+        // Nesnelerin pozisyonlarını güncelle
+        this.state.objects.forEach(obj => {
+            if (obj.element) this.updateObjectPosition(obj);
+        });
     }
 
     save() {

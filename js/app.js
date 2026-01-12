@@ -63,6 +63,16 @@ const SeesawManager = {
     init() {
         this.containerElement = document.getElementById('seesawContainer');
         
+        // Container'daki tüm .object element'lerini temizle (önceki yüklemeden kalanlar için)
+        if (this.containerElement) {
+            const allObjects = this.containerElement.querySelectorAll('.object');
+            allObjects.forEach(obj => {
+                if (obj.parentNode) {
+                    obj.parentNode.removeChild(obj);
+                }
+            });
+        }
+        
         // Load from storage
         const savedSeesaws = Storage.loadAll();
         const activeId = Storage.getActiveId();
@@ -146,11 +156,16 @@ const SeesawManager = {
         this.activeSeesawId = id;
         Storage.setActiveId(id);
         
-        // Reload objects for the new seesaw
+        // Reload state for the new seesaw
         const savedData = Storage.loadSeesaw(id);
-        if (savedData && savedData.objects && savedData.objects.length > 0) {
-            newSeesaw.clearAllObjects();
+        newSeesaw.clearAllObjects();
+        if (savedData) {
             newSeesaw.loadState(savedData);
+            // loadState içinde updatePlankWidth çağrılıyor ama emin olmak için tekrar çağır
+            newSeesaw.updatePlankWidth(newSeesaw.state.plankWidth);
+        } else {
+            // Eğer saved data yoksa bile plank width'i güncelle
+            newSeesaw.updatePlankWidth(newSeesaw.state.plankWidth);
         }
         
         newSeesaw.activate();
