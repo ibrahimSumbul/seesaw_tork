@@ -139,8 +139,11 @@ body {
 /* === Seesaw Container === */
 .seesaw-container {
     position: relative;
-    width: 1200px;
-    height: 500px;
+    width: 100%;
+    max-width: 1200px;
+    aspect-ratio: 12 / 5;
+    min-height: 300px;
+    height: auto;
     margin: 0 auto;
     background: linear-gradient(180deg, #e8f4f8 0%, #d5e8ed 100%);
     border-radius: 12px;
@@ -500,7 +503,9 @@ body {
     .seesaw-container {
         width: 100%;
         max-width: 800px;
-        height: 400px;
+        aspect-ratio: 2 / 1;
+        min-height: 350px;
+        height: auto;
     }
     
     .stats {
@@ -560,8 +565,10 @@ body {
     
     .seesaw-container {
         width: 100%;
-        height: 350px;
         max-width: 100%;
+        aspect-ratio: 3 / 1;
+        min-height: 300px;
+        height: auto;
     }
     
     .plank-slider-box {
@@ -648,7 +655,9 @@ body {
     }
     
     .seesaw-container {
-        height: 300px;
+        aspect-ratio: 3 / 1;
+        min-height: 250px;
+        height: auto;
     }
     
     .horizontal-slider {
